@@ -1199,16 +1199,17 @@ function awesompd:try_get_local_cover(current_file)
    if self.mpd_config then
       local result
       -- First find the music directory in MPD configuration file
-      local _, _, music_folder = string.find(
-         self.pread('cat ' .. self.mpd_config .. ' | grep -v ^"#" | grep music_directory', "*line"),
-         'music_directory%s+"(.+)"')
-      music_folder = music_folder .. "/"
+      local mf = self.pread('cat ' .. self.mpd_config .. ' | grep -v ^"#" | grep music_directory', "*line")
+      if mf then
+        local _, _, music_folder = string.find(mf, 'music_directory%s+"(.+)"')
+        music_folder = music_folder .. "/"
       
-      -- If the music_folder is specified with ~ at the beginning,
-      -- replace it with user home directory
-      if string.sub(music_folder, 1, 1) == "~" then
-         local user_folder = self.pread("echo ~", "*line")
-         music_folder = user_folder .. string.sub(music_folder, 2)
+        -- If the music_folder is specified with ~ at the beginning,
+        -- replace it with user home directory
+        if string.sub(music_folder, 1, 1) == "~" then
+           local user_folder = self.pread("echo ~", "*line")
+           music_folder = user_folder .. string.sub(music_folder, 2)
+        end
       end
 
       -- Get the path to the file currently playing.
